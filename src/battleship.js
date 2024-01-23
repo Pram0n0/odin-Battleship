@@ -18,18 +18,45 @@ class Ship {
 class Gameboard {
     constructor() {
         this.board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
-        this._shipsAlive = 0;
+        this.shipsAlive = 0;
     }
 
     placeShip(x, y, alignment, ship) {
+        if (this.isValidShipPlacement(x, y, alignment, ship)) {
+            for (let i = 0; i < ship.length; i++) {
+                if (alignment === "horizontal") {
+                    this.board[y][x + i] = ship;
+                } else if (alignment === "vertical") {
+                    this.board[y + i][x] = ship;
+                }
+            }
+
+            this.shipsAlive++;
+            return true;
+        }
+        return false;
+    }
+
+    isValidShipPlacement(x, y, alignment, ship) {
         for (let i = 0; i < ship.length; i++) {
+            let currentX = x;
+            let currentY = y;
+
             if (alignment === "horizontal") {
-                this.board[y][x + i] = ship;
+                currentX += i;
             } else if (alignment === "vertical") {
-                this.board[y + i][x] = ship;
+                currentY += i;
+            }
+
+            if (
+                currentX < 0 || currentX >= BOARD_SIZE ||
+                currentY < 0 || currentY >= BOARD_SIZE ||
+                this.board[currentY][currentX] !== null
+            ) {
+                return false;
             }
         }
-        this._shipsAlive++;
+        return true;
     }
 
     receiveAttack(x, y) {
@@ -38,7 +65,7 @@ class Gameboard {
         if (targetShip) {
             targetShip.hit();
             if (targetShip.isSunk()) {
-                this._shipsAlive--;
+                this.shipsAlive--;
             }
         } else {
             this.board[y][x] = "miss";
@@ -46,7 +73,7 @@ class Gameboard {
     }
 
     allShipsSunk() {
-        return this._shipsAlive === 0;
+        return this.shipsAlive === 0;
     }
 }
 
@@ -54,11 +81,26 @@ class Player {
     constructor(player, board, enemyBoard) {
         this.player = player;
         this.board = board;
-        this.enemyBoard = enemyBoard
+        this.enemyBoard = enemyBoard;
+        this.hitsRecord = [];
+        this.ShipList = [];
+    }
+
+    isValidAttack(x, y) {
+        return (
+            0 <= x && x < BOARD_SIZE &&
+            0 <= y && y < BOARD_SIZE &&
+            !this.hitsRecord.some(coord => coord[0] === x && coord[1] === y)
+        );
     }
 
     attack(x, y) {
-        this.enemyBoard.receiveAttack(x, y);
+        if (this.isValidAttack(x, y)) {
+            this.enemyBoard.receiveAttack(x, y);
+            this.hitsRecord.push([x, y]);
+            return true;
+        }
+        return false;
     }
 
     randomAttack() {
@@ -66,17 +108,87 @@ class Player {
         const y = Math.floor(Math.random() * BOARD_SIZE);
         this.attack(x, y);
     }
+
+    createShips() {
+        this.ShipList = [
+            new Ship(2),
+            new Ship(3),
+            new Ship(3),
+            new Ship(4),
+            new Ship(5)
+        ];
+    }
+
+    randomShipPlacement() {
+        this.ShipList.forEach(ship => {
+            let x, y, alignment;
+
+            do {
+                x = Math.floor(Math.random() * BOARD_SIZE);
+                y = Math.floor(Math.random() * BOARD_SIZE);
+                alignment = Math.random() < 0.5 ? "horizontal" : "vertical";
+            } while (!this.board.placeShip(x, y, alignment, ship));
+        });
+    }
 }
 
-
-function gameloop() {
+function initialiseGame() {
     const playerBoard = new Gameboard();
-    const robotBoard = new Gameboard();
+    const npcBoard = new Gameboard();
 
-    const player = new Player("player1",playerBoard,robotBoard)
-    const robot = new Player("player2",robotBoard,playerBoard)
-    console.log("hi")   
+    const player = new Player("player", playerBoard, npcBoard);
+    player.createShips();
+    player.randomShipPlacement();
+
+    const npc = new Player("npc", npcBoard, playerBoard);
+    npc.createShips();
+    npc.randomShipPlacement();
+
+    return [player, npc];
+}
+
+function determineStartingPlayer(player, npc) {
+    const number = Math.ceil(Math.random() * 2);
+    return number === 1 ? player : npc;
+}
+
+function playRound(activePlayer) {
+    if (activePlayer.player === "npc") {
+        activePlayer.randomAttack();
+    } else {
+        let x, y, alignment;
+
+        do {
+            x = prompt("x: ");
+            y = prompt("y: ");
+            alignment = prompt("Alignment: ");
+        } while (!activePlayer.attack(x, y, alignment));
+    }
+
+    if (checkForWinner(activePlayer)) {
+        console.log(`${activePlayer.player} wins!`);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function checkForWinner(activePlayer) {
+    return activePlayer.enemyBoard.shipsAlive === 0;
+}
+
+function gameController() {
+    const [player, npc] = initialiseGame();
+
+    let activePlayer = determineStartingPlayer(player, npc);
+
+    let gameEnd = false;
+
+    while (!gameEnd) {
+        gameEnd = playRound(activePlayer);
+        activePlayer = activePlayer === player ? npc : player;
+    }
 }
 
 
-export { Ship, Gameboard, Player, gameloop }
+export default gameController

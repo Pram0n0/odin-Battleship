@@ -1,6 +1,3 @@
-import { Ship, Gameboard, Player, gameloop } from "./battleship"
+import gameController from "./battleship"
 
-Ship
-Gameboard
-Player
-gameloop()
+gameController()
