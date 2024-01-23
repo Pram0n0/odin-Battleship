@@ -67,8 +67,10 @@ class Gameboard {
             if (targetShip.isSunk()) {
                 this.shipsAlive--;
             }
+            console.log("hit")
         } else {
             this.board[y][x] = "miss";
+            console.log("miss")
         }
     }
 
@@ -97,6 +99,7 @@ class Player {
     attack(x, y) {
         if (this.isValidAttack(x, y)) {
             this.enemyBoard.receiveAttack(x, y);
+            console.log(`attacked ${x},${y}`)
             this.hitsRecord.push([x, y]);
             return true;
         }
@@ -136,15 +139,15 @@ function initialiseGame() {
     const playerBoard = new Gameboard();
     const npcBoard = new Gameboard();
 
-    const player = new Player("player", playerBoard, npcBoard);
+    const player = new Player("Player", playerBoard, npcBoard);
     player.createShips();
     player.randomShipPlacement();
 
-    const npc = new Player("npc", npcBoard, playerBoard);
+    const npc = new Player("NPC", npcBoard, playerBoard);
     npc.createShips();
     npc.randomShipPlacement();
 
-    return [player, npc];
+    return { player, npc };
 }
 
 function determineStartingPlayer(player, npc) {
@@ -153,7 +156,8 @@ function determineStartingPlayer(player, npc) {
 }
 
 function playRound(activePlayer) {
-    if (activePlayer.player === "npc") {
+    console.log(`${activePlayer.player}'s turn`)
+    if (activePlayer.player === "NPC") {
         activePlayer.randomAttack();
     } else {
         let x, y, alignment;
@@ -178,9 +182,10 @@ function checkForWinner(activePlayer) {
 }
 
 function gameController() {
-    const [player, npc] = initialiseGame();
+    const { player, npc } = initialiseGame();
 
     let activePlayer = determineStartingPlayer(player, npc);
+    console.log(`${activePlayer.player}'s starts`)
 
     let gameEnd = false;
 
