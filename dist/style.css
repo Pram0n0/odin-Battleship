@@ -1,0 +1,17 @@
+.game-container {
+   display: flex;
+   justify-content: space-between; 
+}
+
+.player-board, .npc-board {
+    border: 1px solid black;
+    width: 500px;
+    height: 500px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+}
+
+.cell {
+    border: 1px solid black;
+}

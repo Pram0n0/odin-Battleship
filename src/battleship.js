@@ -1,5 +1,10 @@
 const BOARD_SIZE = 10;
 
+const startBtn = document.querySelector(".startBtn")
+
+const htmlPlayerBoard = document.querySelector(".player-board")
+const htmlNpcBoard = document.querySelector(".npc-board")
+
 class Ship {
     constructor(length) {
         this.length = length;
@@ -147,6 +152,9 @@ function initialiseGame() {
     npc.createShips();
     npc.randomShipPlacement();
 
+    updateBoard(htmlPlayerBoard, playerBoard.board, player.hitsRecord, true);
+    updateBoard(htmlNpcBoard, npcBoard.board, npc.hitsRecord, false);
+
     return { player, npc };
 }
 
@@ -155,27 +163,40 @@ function determineStartingPlayer(player, npc) {
     return number === 1 ? player : npc;
 }
 
-function playRound(activePlayer) {
-    console.log(`${activePlayer.player}'s turn`)
+function getPlayerMove(player) {
+    let x, y;
+    do {
+        x = parseInt(prompt("Enter x coordinate: "));
+        y = parseInt(prompt("Enter y coordinate: "));
+    } while (!player.attack(x, y));
+}
+
+async function playRoundWithDelay(activePlayer, player, npc, roundCount, isPlayerBoard) {
+    console.log(`Round ${roundCount}: ${activePlayer.player}'s turn`);
+    const targetBoard = isPlayerBoard ? htmlPlayerBoard : htmlNpcBoard;
+
+    if (roundCount === 0) {
+        // Initial delay before the first round
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust the delay as needed
+    }
+
     if (activePlayer.player === "NPC") {
         activePlayer.randomAttack();
     } else {
-        let x, y, alignment;
-
-        do {
-            x = prompt("x: ");
-            y = prompt("y: ");
-            alignment = prompt("Alignment: ");
-        } while (!activePlayer.attack(x, y, alignment));
+        getPlayerMove(activePlayer);
     }
+
+    updateBoard(targetBoard, activePlayer.enemyBoard.board, activePlayer.hitsRecord, isPlayerBoard);
 
     if (checkForWinner(activePlayer)) {
         console.log(`${activePlayer.player} wins!`);
-        return true;
     } else {
-        return false;
+        await new Promise(resolve => setTimeout(resolve, 0));
+        activePlayer = activePlayer === player ? npc : player;
+        await playRoundWithDelay(activePlayer, player, npc, roundCount + 1, !isPlayerBoard);
     }
 }
+
 
 function checkForWinner(activePlayer) {
     return activePlayer.enemyBoard.shipsAlive === 0;
@@ -183,17 +204,50 @@ function checkForWinner(activePlayer) {
 
 function gameController() {
     const { player, npc } = initialiseGame();
-
     let activePlayer = determineStartingPlayer(player, npc);
-    console.log(`${activePlayer.player}'s starts`)
+    console.log(`${activePlayer.player}'s starts`);
 
-    let gameEnd = false;
+    playRoundWithDelay(activePlayer, player, npc, 0);
+}
 
-    while (!gameEnd) {
-        gameEnd = playRound(activePlayer);
-        activePlayer = activePlayer === player ? npc : player;
+function startGame() {
+    startBtn.addEventListener("click", () => {
+        console.log("Start Game")
+        gameController()
+    })
+}
+
+function updateBoard(boardElement, boardData, hitsRecord, isPlayerBoard) {
+    console.log(`Updating board: ${boardElement.className}`);
+    boardElement.innerHTML = "";
+
+    for (let i = 0; i < BOARD_SIZE; i++) {
+        for (let j = 0; j < BOARD_SIZE; j++) {
+            const coordinateValue = boardData[i][j];
+
+            const cell = document.createElement("div");
+            cell.className = "cell";
+
+            if (coordinateValue) {
+                if (coordinateValue === "miss") {
+                    cell.style.backgroundColor = "red";
+                    cell.textContent = "miss"
+                } else {
+                    if (isPlayerBoard) {
+                        cell.textContent = "Ship"
+                    } else {
+                        cell.textContent = ""
+                    }
+                    const isAttacked = hitsRecord.some(coord => coord[1] === i && coord[0] === j);
+                    console.log(isAttacked)
+                    cell.style.backgroundColor = isAttacked ? "green" : "";
+                }
+            } else {
+                cell.textContent = ""
+            }
+            boardElement.appendChild(cell);
+        }
     }
 }
 
-
-export default gameController
+export default startGame

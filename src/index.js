@@ -1,3 +1,3 @@
-import gameController from "./battleship"
+import startGame from "./battleship"
 
-gameController()
+startGame()
