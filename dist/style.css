@@ -14,4 +14,49 @@
 
 .cell {
     border: 1px solid black;
+    text-align: center;
+    line-height: 50%;
+}
+
+function getPlayerMoveOnClick(player) {
+    return new Promise(resolve => {
+        const cells = document.querySelectorAll('.npc-board .cell');
+        cells.forEach((cell, index) => {
+            cell.addEventListener('click', () => {
+                const x = index % BOARD_SIZE;
+                const y = Math.floor(index / BOARD_SIZE);
+                if (player.attack(x, y)) {
+                    resolve();
+                } else {
+                    console.log('Invalid move. Try again.');
+                }
+            });
+        });
+    });
+}
+
+async function playRoundWithDelay(activePlayer, player, npc, roundCount, isPlayerBoard) {
+    console.log(`Round ${roundCount}: ${activePlayer.player}'s turn`);
+    const targetBoard = isPlayerBoard ? htmlPlayerBoard : htmlNpcBoard;
+
+    if (roundCount === 0) {
+        // Initial delay before the first round
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust the delay as needed
+    }
+
+    if (activePlayer.player === 'NPC') {
+        activePlayer.randomAttack();
+    } else {
+        await getPlayerMoveOnClick(activePlayer);
+    }
+
+    updateBoard(targetBoard, activePlayer.enemyBoard.board, activePlayer.hitsRecord, isPlayerBoard);
+
+    if (checkForWinner(activePlayer)) {
+        console.log(`${activePlayer.player} wins!`);
+    } else {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        activePlayer = activePlayer === player ? npc : player;
+        await playRoundWithDelay(activePlayer, player, npc, roundCount + 1, !isPlayerBoard);
+    }
 }

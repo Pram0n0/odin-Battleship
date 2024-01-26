@@ -163,12 +163,21 @@ function determineStartingPlayer(player, npc) {
     return number === 1 ? player : npc;
 }
 
-function getPlayerMove(player) {
-    let x, y;
-    do {
-        x = parseInt(prompt("Enter x coordinate: "));
-        y = parseInt(prompt("Enter y coordinate: "));
-    } while (!player.attack(x, y));
+function getPlayerMoveOnClick(player) {
+    return new Promise(resolve => {
+        const cells = document.querySelectorAll('.npc-board .cell');
+        cells.forEach((cell, index) => {
+            cell.addEventListener('click', () => {
+                const x = index % BOARD_SIZE;
+                const y = Math.floor(index / BOARD_SIZE);
+                if (player.attack(x, y)) {
+                    resolve();
+                } else {
+                    console.log('Invalid move. Try again.');
+                }
+            });
+        });
+    });
 }
 
 async function playRoundWithDelay(activePlayer, player, npc, roundCount, isPlayerBoard) {
@@ -180,10 +189,10 @@ async function playRoundWithDelay(activePlayer, player, npc, roundCount, isPlaye
         await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust the delay as needed
     }
 
-    if (activePlayer.player === "NPC") {
+    if (activePlayer.player === 'NPC') {
         activePlayer.randomAttack();
     } else {
-        getPlayerMove(activePlayer);
+        await getPlayerMoveOnClick(activePlayer);
     }
 
     updateBoard(targetBoard, activePlayer.enemyBoard.board, activePlayer.hitsRecord, isPlayerBoard);
@@ -231,19 +240,19 @@ function updateBoard(boardElement, boardData, hitsRecord, isPlayerBoard) {
             if (coordinateValue) {
                 if (coordinateValue === "miss") {
                     cell.style.backgroundColor = "red";
-                    cell.textContent = "miss"
+                    cell.innerHTML = "&#10060;"
                 } else {
                     if (isPlayerBoard) {
-                        cell.textContent = "Ship"
+                        cell.innerHTML = "Ship"
                     } else {
-                        cell.textContent = ""
+                        cell.innerHTML = ""
                     }
                     const isAttacked = hitsRecord.some(coord => coord[1] === i && coord[0] === j);
                     console.log(isAttacked)
                     cell.style.backgroundColor = isAttacked ? "green" : "";
                 }
             } else {
-                cell.textContent = ""
+                cell.innerHTML = ""
             }
             boardElement.appendChild(cell);
         }

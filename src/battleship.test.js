@@ -21,234 +21,256 @@ test('array with non-number', () => {
   expect(analyseArray([1, 2, 3, 4, '5'])).toBe('Array contains non-numeric elements');
 });
 
-const BOARD_SIZE = 10;
+// const BOARD_SIZE = 10;
 
-const startBtn = document.querySelector(".startBtn")
+// const startBtn = document.querySelector(".startBtn")
 
-const htmlPlayerBoard = document.querySelector(".player-board")
-const htmlNpcBoard = document.querySelector(".npc-board")
+// const htmlPlayerBoard = document.querySelector(".player-board")
+// const htmlNpcBoard = document.querySelector(".npc-board")
 
-class Ship {
-    constructor(length) {
-        this.length = length;
-        this.beenHit = 0;
-    }
+// class Ship {
+//     constructor(length) {
+//         this.length = length;
+//         this.beenHit = 0;
+//     }
 
-    hit() {
-        this.beenHit++;
-    }
+//     hit() {
+//         this.beenHit++;
+//     }
 
-    isSunk() {
-        return this.beenHit >= this.length;
-    }
-}
+//     isSunk() {
+//         return this.beenHit >= this.length;
+//     }
+// }
 
-class Gameboard {
-    constructor() {
-        this.board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
-        this.shipsAlive = 0;
-    }
+// class Gameboard {
+//     constructor() {
+//         this.board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
+//         this.shipsAlive = 0;
+//     }
 
-    placeShip(x, y, alignment, ship) {
-        if (this.isValidShipPlacement(x, y, alignment, ship)) {
-            for (let i = 0; i < ship.length; i++) {
-                if (alignment === "horizontal") {
-                    this.board[y][x + i] = ship;
-                } else if (alignment === "vertical") {
-                    this.board[y + i][x] = ship;
-                }
-            }
+//     placeShip(x, y, alignment, ship) {
+//         if (this.isValidShipPlacement(x, y, alignment, ship)) {
+//             for (let i = 0; i < ship.length; i++) {
+//                 if (alignment === "horizontal") {
+//                     this.board[y][x + i] = ship;
+//                 } else if (alignment === "vertical") {
+//                     this.board[y + i][x] = ship;
+//                 }
+//             }
 
-            this.shipsAlive++;
-            return true;
-        }
-        return false;
-    }
+//             this.shipsAlive++;
+//             return true;
+//         }
+//         return false;
+//     }
 
-    isValidShipPlacement(x, y, alignment, ship) {
-        for (let i = 0; i < ship.length; i++) {
-            let currentX = x;
-            let currentY = y;
+//     isValidShipPlacement(x, y, alignment, ship) {
+//         for (let i = 0; i < ship.length; i++) {
+//             let currentX = x;
+//             let currentY = y;
 
-            if (alignment === "horizontal") {
-                currentX += i;
-            } else if (alignment === "vertical") {
-                currentY += i;
-            }
+//             if (alignment === "horizontal") {
+//                 currentX += i;
+//             } else if (alignment === "vertical") {
+//                 currentY += i;
+//             }
 
-            if (
-                currentX < 0 || currentX >= BOARD_SIZE ||
-                currentY < 0 || currentY >= BOARD_SIZE ||
-                this.board[currentY][currentX] !== null
-            ) {
-                return false;
-            }
-        }
-        return true;
-    }
+//             if (
+//                 currentX < 0 || currentX >= BOARD_SIZE ||
+//                 currentY < 0 || currentY >= BOARD_SIZE ||
+//                 this.board[currentY][currentX] !== null
+//             ) {
+//                 return false;
+//             }
+//         }
+//         return true;
+//     }
 
-    receiveAttack(x, y) {
-        const targetShip = this.board[y][x];
+//     receiveAttack(x, y) {
+//         const targetShip = this.board[y][x];
 
-        if (targetShip) {
-            targetShip.hit();
-            if (targetShip.isSunk()) {
-                this.shipsAlive--;
-            }
-            console.log("hit")
-        } else {
-            this.board[y][x] = "miss";
-            console.log("miss")
-        }
-    }
+//         if (targetShip) {
+//             targetShip.hit();
+//             if (targetShip.isSunk()) {
+//                 this.shipsAlive--;
+//             }
+//             console.log("hit")
+//         } else {
+//             this.board[y][x] = "miss";
+//             console.log("miss")
+//         }
+//     }
 
-    allShipsSunk() {
-        return this.shipsAlive === 0;
-    }
-}
+//     allShipsSunk() {
+//         return this.shipsAlive === 0;
+//     }
+// }
 
-class Player {
-    constructor(player, board, enemyBoard) {
-        this.player = player;
-        this.board = board;
-        this.enemyBoard = enemyBoard;
-        this.hitsRecord = [];
-        this.ShipList = [];
-    }
+// class Player {
+//     constructor(player, board, enemyBoard) {
+//         this.player = player;
+//         this.board = board;
+//         this.enemyBoard = enemyBoard;
+//         this.hitsRecord = [];
+//         this.ShipList = [];
+//     }
 
-    isValidAttack(x, y) {
-        return (
-            0 <= x && x < BOARD_SIZE &&
-            0 <= y && y < BOARD_SIZE &&
-            !this.hitsRecord.some(coord => coord[0] === x && coord[1] === y)
-        );
-    }
+//     isValidAttack(x, y) {
+//         return (
+//             0 <= x && x < BOARD_SIZE &&
+//             0 <= y && y < BOARD_SIZE &&
+//             !this.hitsRecord.some(coord => coord[0] === x && coord[1] === y)
+//         );
+//     }
 
-    attack(x, y) {
-        if (this.isValidAttack(x, y)) {
-            this.enemyBoard.receiveAttack(x, y);
-            console.log(`attacked ${x},${y}`)
-            this.hitsRecord.push([x, y]);
-            return true;
-        }
-        return false;
-    }
+//     attack(x, y) {
+//         if (this.isValidAttack(x, y)) {
+//             this.enemyBoard.receiveAttack(x, y);
+//             console.log(`attacked ${x},${y}`)
+//             this.hitsRecord.push([x, y]);
+//             return true;
+//         }
+//         return false;
+//     }
 
-    randomAttack() {
-        const x = Math.floor(Math.random() * BOARD_SIZE);
-        const y = Math.floor(Math.random() * BOARD_SIZE);
-        this.attack(x, y);
-    }
+//     randomAttack() {
+//         const x = Math.floor(Math.random() * BOARD_SIZE);
+//         const y = Math.floor(Math.random() * BOARD_SIZE);
+//         this.attack(x, y);
+//     }
 
-    createShips() {
-        this.ShipList = [
-            new Ship(2),
-            new Ship(3),
-            new Ship(3),
-            new Ship(4),
-            new Ship(5)
-        ];
-    }
+//     createShips() {
+//         this.ShipList = [
+//             new Ship(2),
+//             new Ship(3),
+//             new Ship(3),
+//             new Ship(4),
+//             new Ship(5)
+//         ];
+//     }
 
-    randomShipPlacement() {
-        this.ShipList.forEach(ship => {
-            let x, y, alignment;
+//     randomShipPlacement() {
+//         this.ShipList.forEach(ship => {
+//             let x, y, alignment;
 
-            do {
-                x = Math.floor(Math.random() * BOARD_SIZE);
-                y = Math.floor(Math.random() * BOARD_SIZE);
-                alignment = Math.random() < 0.5 ? "horizontal" : "vertical";
-            } while (!this.board.placeShip(x, y, alignment, ship));
-        });
-    }
-}
+//             do {
+//                 x = Math.floor(Math.random() * BOARD_SIZE);
+//                 y = Math.floor(Math.random() * BOARD_SIZE);
+//                 alignment = Math.random() < 0.5 ? "horizontal" : "vertical";
+//             } while (!this.board.placeShip(x, y, alignment, ship));
+//         });
+//     }
+// }
 
-function initialiseGame() {
-    const playerBoard = new Gameboard();
-    const npcBoard = new Gameboard();
+// function initialiseGame() {
+//     const playerBoard = new Gameboard();
+//     const npcBoard = new Gameboard();
 
-    const player = new Player("Player", playerBoard, npcBoard);
-    player.createShips();
-    player.randomShipPlacement();
+//     const player = new Player("Player", playerBoard, npcBoard);
+//     player.createShips();
+//     player.randomShipPlacement();
 
-    const npc = new Player("NPC", npcBoard, playerBoard);
-    npc.createShips();
-    npc.randomShipPlacement();
+//     const npc = new Player("NPC", npcBoard, playerBoard);
+//     npc.createShips();
+//     npc.randomShipPlacement();
 
-    updateBoard(htmlPlayerBoard, playerBoard.board);
-    updateBoard(htmlNpcBoard, npcBoard.board);
+//     updateBoard(htmlPlayerBoard, playerBoard.board, player.hitsRecord, true);
+//     updateBoard(htmlNpcBoard, npcBoard.board, npc.hitsRecord, false);
 
-    return { player, npc };
-}
+//     return { player, npc };
+// }
 
-function determineStartingPlayer(player, npc) {
-    const number = Math.ceil(Math.random() * 2);
-    return number === 1 ? player : npc;
-}
+// function determineStartingPlayer(player, npc) {
+//     const number = Math.ceil(Math.random() * 2);
+//     return number === 1 ? player : npc;
+// }
 
-function playRoundWithDelay(activePlayer, roundCount) {
-    setTimeout(() => {
-        console.log(`Round ${roundCount}: ${activePlayer.player}'s turn`);
-        const targetBoard = activePlayer.player === "NPC" ? htmlPlayerBoard : htmlNpcBoard;
+// function getPlayerMove(player) {
+//     let x, y;
+//     do {
+//         x = parseInt(prompt("Enter x coordinate: "));
+//         y = parseInt(prompt("Enter y coordinate: "));
+//     } while (!player.attack(x, y));
+// }
 
-        if (activePlayer.player === "NPC") {
-            activePlayer.randomAttack();
-        } else {
-            let x, y, alignment;
-            do {
-                x = prompt("x: ");
-                y = prompt("y: ");
-            } while (!activePlayer.attack(x, y));
-        }
+// async function playRoundWithDelay(activePlayer, player, npc, roundCount, isPlayerBoard) {
+//     console.log(`Round ${roundCount}: ${activePlayer.player}'s turn`);
+//     const targetBoard = isPlayerBoard ? htmlPlayerBoard : htmlNpcBoard;
 
-        updateBoard(targetBoard, activePlayer.enemyBoard.board);
+//     if (roundCount === 0) {
+//         // Initial delay before the first round
+//         await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust the delay as needed
+//     }
 
-        if (checkForWinner(activePlayer)) {
-            console.log(`${activePlayer.player} wins!`);
-        } else {
-            activePlayer = activePlayer === player ? npc : player;
-            playRoundWithDelay(activePlayer, roundCount + 1);
-        }
-    }, 0); // Use 0 for the minimum delay
-}
+//     if (activePlayer.player === "NPC") {
+//         activePlayer.randomAttack();
+//     } else {
+//         getPlayerMove(activePlayer);
+//     }
 
-function checkForWinner(activePlayer) {
-    return activePlayer.enemyBoard.shipsAlive === 0;
-}
+//     updateBoard(targetBoard, activePlayer.enemyBoard.board, activePlayer.hitsRecord, isPlayerBoard);
 
-function gameController() {
-    const { player, npc } = initialiseGame();
+//     if (checkForWinner(activePlayer)) {
+//         console.log(`${activePlayer.player} wins!`);
+//     } else {
+//         await new Promise(resolve => setTimeout(resolve, 0));
+//         activePlayer = activePlayer === player ? npc : player;
+//         await playRoundWithDelay(activePlayer, player, npc, roundCount + 1, !isPlayerBoard);
+//     }
+// }
 
-    let activePlayer = determineStartingPlayer(player, npc);
-    console.log(`${activePlayer.player}'s starts`)
 
-    let roundCount = 1;
-    let gameEnd = false;
+// function checkForWinner(activePlayer) {
+//     return activePlayer.enemyBoard.shipsAlive === 0;
+// }
 
-    while (!gameEnd) {
-        gameEnd = playRoundWithDelay(activePlayer, roundCount);
-        activePlayer = activePlayer === player ? npc : player;
-    }
-}
+// function gameController() {
+//     const { player, npc } = initialiseGame();
+//     let activePlayer = determineStartingPlayer(player, npc);
+//     console.log(`${activePlayer.player}'s starts`);
 
-function startGame() {
-    startBtn.addEventListener("click", () => {
-        console.log("Start Game")
-        gameController()
-    })
-}
+//     playRoundWithDelay(activePlayer, player, npc, 0);
+// }
 
-function updateBoard(boardElement, boardData) {
-    boardElement.innerHTML = ""
+// function startGame() {
+//     startBtn.addEventListener("click", () => {
+//         console.log("Start Game")
+//         gameController()
+//     })
+// }
 
-    for (let i = 0; i < BOARD_SIZE; i++) {
-        for (let j = 0; j < BOARD_SIZE; j++) {
-            const cell = document.createElement("div");
-            cell.className = "cell";
-            cell.textContent = boardData[i][j] || ""; 
-            boardElement.appendChild(cell);
-        }
-    }
-}
+// function updateBoard(boardElement, boardData, hitsRecord, isPlayerBoard) {
+//     console.log(`Updating board: ${boardElement.className}`);
+//     boardElement.innerHTML = "";
 
-export default startGame
+//     for (let i = 0; i < BOARD_SIZE; i++) {
+//         for (let j = 0; j < BOARD_SIZE; j++) {
+//             const coordinateValue = boardData[i][j];
+
+//             const cell = document.createElement("div");
+//             cell.className = "cell";
+
+//             if (coordinateValue) {
+//                 if (coordinateValue === "miss") {
+//                     cell.style.backgroundColor = "red";
+//                     cell.innerHTML = "&#10060;"
+//                 } else {
+//                     if (isPlayerBoard) {
+//                         cell.innerHTML = "Ship"
+//                     } else {
+//                         cell.innerHTML = ""
+//                     }
+//                     const isAttacked = hitsRecord.some(coord => coord[1] === i && coord[0] === j);
+//                     console.log(isAttacked)
+//                     cell.style.backgroundColor = isAttacked ? "green" : "";
+//                 }
+//             } else {
+//                 cell.innerHTML = ""
+//             }
+//             boardElement.appendChild(cell);
+//         }
+//     }
+// }
+
+// export default startGame
